@@ -1,7 +1,21 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
+
 const electron = require('electron')
+var Web3 = require('web3');
+var web3 = new Web3();
+
+
+//create path
+const USER_HOME = process.env.HOME || process.env.USERPROFILE
+var config_path = USER_HOME+"/antimatter/"
+var keystore_path = USER_HOME+"/antimatter/keystore/";
+var path= require("path");
+var fs = require("fs");
+
+try{fs.mkdirSync(path.resolve(config_path))}catch(e){}
+try{fs.mkdirSync(path.resolve(keystore_path))}catch(e){}
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -51,4 +65,38 @@ const { ipcMain } = require('electron')
 ipcMain.on('test', (event, arg) => {
   console.log(arg) // prints "ping"
   event.returnValue = 'pong'
+})
+
+ipcMain.on('create_account', (event, arg) => {
+  console.log(arg) // prints "ping"
+  //var data = await web3.eth.personal.newAccount(arg.password)
+  console.log(web3.eth.accounts.wallet.create(1))
+  console.log(web3.eth.accounts.wallet.encrypt(arg.password))
+  var file_path = keystore_path+arg.username;
+  file_path = path.resolve(file_path)
+  fs.writeFile(file_path, JSON.stringify(web3.eth.accounts.wallet.encrypt(arg.password)[0]),  function(err) {
+    if (err) {
+      event.returnValue = 0;
+    }
+    event.returnValue = 1;
+  });
+})
+
+ipcMain.on('get_account_list', (event, arg) => {
+  fs.readdir(keystore_path,function(err,files){  
+    if(err){  
+        console.warn(err)  
+    }else{  
+      var rtn = []
+      files.forEach(function(filename){  
+        var filedir = path.join(keystore_path, filename); 
+        var stats = fs.statSync(filedir)
+        var isFile = stats.isFile(); 
+        if(isFile){  
+            rtn.push(filename) 
+        } 
+      });  
+      event.returnValue = rtn; 
+    }  
+  }) 
 })

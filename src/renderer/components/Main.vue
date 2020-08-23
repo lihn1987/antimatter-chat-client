@@ -62,14 +62,14 @@ export default {
   name: 'Main',
   data () {
     return {
-      cur_page: 'create',
-      account_value: '111',
+      cur_page: 'login',
+      account_value: '',
       account_password: '',
 
       create_account_username: '',
       create_account_password: '',
       create_account_password_repeat: '',
-      account_list: [{value: '111', label: '222'}]
+      account_list: []
       // account_list: [/* {value:'', label:''} */]
     }
   },
@@ -77,6 +77,7 @@ export default {
   },
   mounted: function () {
     _this = this
+    _this.FlushAccountList()
     console.log('send test ping start')
     console.log(ipcRenderer.sendSync('test', 'ping'))
     console.log('send test ping end')
@@ -88,7 +89,38 @@ export default {
         _this.$alert(_this.$t("m.login.user_name_null"), _this.$t("m.alert"), {
           confirmButtonText: _this.$t("m.ok"),
         })
+      }else if(_this.create_account_password === "" ||
+      _this.create_account_password_repeat === "" ||
+      _this.create_account_password !== _this.create_account_password_repeat){
+        _this.$alert(_this.$t("m.login.repeat_password_error"), _this.$t("m.alert"), {
+          confirmButtonText: _this.$t("m.ok"),
+        })
+      }else{
+        if(ipcRenderer.sendSync('create_account', {
+          username:_this.create_account_username,
+          password:_this.create_account_password
+        })){
+            _this.$alert(_this.$t("m.login.account_create_ok"), _this.$t("m.alert"), {
+              confirmButtonText: _this.$t("m.ok"),
+              callback: action => {
+                _this.cur_page = "login"
+              }
+            })
+        }
+        else{
+          _this.$alert(_this.$t("m.login.account_create_faild"), _this.$t("m.alert"), {
+              confirmButtonText: _this.$t("m.ok"),
+          })
+        }
       }
+    },
+    FlushAccountList:function(){
+      _this.account_list = []
+      var account_list = ipcRenderer.sendSync('get_account_list')
+      account_list.forEach(function(filename){
+        _this.account_value = filename;
+        _this.account_list.push({value: filename, label: filename});
+      })
     }
   }
 }

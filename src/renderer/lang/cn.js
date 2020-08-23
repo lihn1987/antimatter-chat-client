@@ -18,5 +18,8 @@ export const m = {
     create_account: '创建账户',
 
     user_name_null:"账户名称不能为空",
+    repeat_password_error:"账户密码不能为空，且两次密码必须相同",
+    account_create_ok:"账户创建成功",
+    account_create_faild:"账户创建失败，未知错误",
   }
 }
