@@ -5,7 +5,8 @@ import { app, BrowserWindow } from 'electron'
 const electron = require('electron')
 var Web3 = require('web3');
 var web3 = new Web3();
-
+import {NetClient} from "./net_client";
+var chat_client = new NetClient("192.168.31.61", 9987)
 
 //create path
 const USER_HOME = process.env.HOME || process.env.USERPROFILE
@@ -100,3 +101,14 @@ ipcMain.on('get_account_list', (event, arg) => {
     }  
   }) 
 })
+
+ipcMain.on('login', (event, arg) => {
+  chat_client.Connect().then(function(data){
+    event.returnValue = 1;
+  }).catch(function(err){
+    event.returnValue = 0; 
+  })
+})
+
+
+

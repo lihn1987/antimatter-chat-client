@@ -22,9 +22,9 @@
             <div class="input_label">{{$t("m.login.password")}}</div>
             <el-input class="input_box" :placeholder="$t('m.login.please_input_password')" v-model="account_password" show-password></el-input>
           </div>
-          <el-button class="btn_login" type="primary" style="margin-top:24px;">{{$t("m.login.login")}}</el-button>
+          <el-button class="btn_login" type="primary" style="margin-top:24px;" @click="Login">{{$t("m.login.login")}}</el-button>
           <div class="assist_line clearfix">
-            <el-link class="left" type="primary">{{$t("m.login.new_account")}}</el-link>
+            <el-link class="left" type="primary" @click="cur_page='create'">{{$t("m.login.new_account")}}</el-link>
             <el-link class="right" type="primary">{{$t("m.login.import_account")}}</el-link>
           </div>
           
@@ -47,7 +47,10 @@
           <div class="input_label">{{$t("m.login.repeat_password")}}</div>
           <el-input class="input_box" :placeholder="$t('m.login.repeat_passwrod_placeholder')" v-model="create_account_password_repeat" show-password></el-input>
         </div>
-        <el-button class="btn_login" type="primary" style="margin-top:24px;" @click="CreateAccount">{{$t("m.login.create_account")}}</el-button>
+        <div class="clearfix">
+          <el-button class="btn_create left" type="primary" style="margin-top:24px;" @click="CreateAccount">{{$t("m.login.create_account")}}</el-button>
+          <el-button class="btn_back right" plain style="margin-top:24px;" @click="cur_page = 'login'">{{$t("m.login.back")}}</el-button>
+        </div>
       </div>
     </div>
   </div>
@@ -83,6 +86,14 @@ export default {
     console.log('send test ping end')
   },
   methods: {
+    FlushAccountList:function(){
+      _this.account_list = []
+      var account_list = ipcRenderer.sendSync('get_account_list')
+      account_list.forEach(function(filename){
+        _this.account_value = filename;
+        _this.account_list.push({value: filename, label: filename});
+      })
+    },
     CreateAccount: function () {
       _this.create_account_username.replace(/(^\s*)|(\s*$)/g, '')
       if (_this.create_account_username === '') {
@@ -104,6 +115,7 @@ export default {
               confirmButtonText: _this.$t("m.ok"),
               callback: action => {
                 _this.cur_page = "login"
+                _this.FlushAccountList()
               }
             })
         }
@@ -114,13 +126,28 @@ export default {
         }
       }
     },
-    FlushAccountList:function(){
-      _this.account_list = []
-      var account_list = ipcRenderer.sendSync('get_account_list')
-      account_list.forEach(function(filename){
-        _this.account_value = filename;
-        _this.account_list.push({value: filename, label: filename});
-      })
+    Login:function(){
+      /*alert(_this.account_value)
+      alert(_this.account_password)*/
+      if(_this.account_value === ""){
+        _this.$alert(_this.$t("m.login.account_null"), _this.$t("m.alert"), {
+            confirmButtonText: _this.$t("m.ok"),
+            callback: action => {
+            }
+          })
+          return;
+      }
+      else if(_this.account_password === ""){
+        _this.$alert(_this.$t("m.login.password_null"), _this.$t("m.alert"), {
+            confirmButtonText: _this.$t("m.ok"),
+            callback: action => {
+            }
+          })
+      }else{
+        var ddd = ipcRenderer.sendSync('login',{})
+        console.log("connect result:"+ddd)
+      }
+
     }
   }
 }
@@ -164,7 +191,15 @@ export default {
   width:100%;
   margin-top:12px;
 }
-
+.btn_create{
+  box-sizing: border-box;
+  width:70%;
+  margin-top:12px;
+}
+.btn_back{
+  box-sizing: border-box;
+  width:20%
+}
 .assist_line{
   margin-top:12px;
   height:24px;
