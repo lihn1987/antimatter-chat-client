@@ -1,10 +1,12 @@
 'use strict'
 
 import { app, BrowserWindow } from 'electron'
-
+const secp256k1 = require('secp256k1')
 const electron = require('electron')
 var Web3 = require('web3');
 var web3 = new Web3();
+
+const buffer = require('buffer');
 import {NetClient} from "./net_client";
 var chat_client = new NetClient("192.168.31.61", 9987)
 
@@ -69,24 +71,22 @@ ipcMain.on('test', (event, arg) => {
 })
 
 ipcMain.on('create_account', (event, arg) => {
-  console.log(arg) // prints "ping"
-  //var data = await web3.eth.personal.newAccount(arg.password)
-  console.log(web3.eth.accounts.wallet.create(1))
-  console.log(web3.eth.accounts.wallet.encrypt(arg.password))
+  console.log("创建账户")
+  var accout_str = JSON.stringify(web3.eth.accounts.encrypt(web3.eth.accounts.create().privateKey, arg.password))
+  console.log("要创建的账户为:"+accout_str);
   var file_path = keystore_path+arg.username;
   file_path = path.resolve(file_path)
-  fs.writeFile(file_path, JSON.stringify(web3.eth.accounts.wallet.encrypt(arg.password)[0]),  function(err) {
+  fs.writeFile(file_path, accout_str,  function(err) {
     if (err) {
       event.returnValue = 0;
     }
     event.returnValue = 1;
   });
 })
-
 ipcMain.on('get_account_list', (event, arg) => {
   fs.readdir(keystore_path,function(err,files){  
     if(err){  
-        console.warn(err)  
+        console.warn(err)   
     }else{  
       var rtn = []
       files.forEach(function(filename){  
@@ -103,11 +103,39 @@ ipcMain.on('get_account_list', (event, arg) => {
 })
 
 ipcMain.on('login', (event, arg) => {
-  chat_client.Connect().then(function(data){
+  fs.readFile(keystore_path+arg.accout, function (err, data) {
+    if (err) {
+      event.returnValue = -1;
+      return; 
+    }else{
+      console.log(data.toString());
+      try{
+        var result = web3.eth.accounts.decrypt(JSON.parse(data.toString()), arg.passwd);
+        console.log(result)
+        chat_client.Connect(
+          function(){
+            //获取公钥
+            const pub_key_buf_compress = secp256k1.publicKeyCreate(Buffer.alloc(32, result.privateKey.substring(2), "hex"),true);
+            console.log(Buffer.from(pub_key_buf_compress,'hex').toString('hex'))
+            event.returnValue = 0;
+          },function(){
+            event.returnValue = -3; 
+          })
+      }catch(e){
+        console.log(e)
+        event.returnValue = -2;
+        return; 
+      }
+       
+    }
+  });
+  //web3.eth.accounts.wallet.()
+  /*chat_client.Connect().then(function(data){
     event.returnValue = 1;
   }).catch(function(err){
     event.returnValue = 0; 
-  })
+  })*/
+  //console.log(arg.accout + "~~" + arg.passwd)
 })
 
 

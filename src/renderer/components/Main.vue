@@ -139,13 +139,34 @@ export default {
       }
       else if(_this.account_password === ""){
         _this.$alert(_this.$t("m.login.password_null"), _this.$t("m.alert"), {
+          confirmButtonText: _this.$t("m.ok"),
+          callback: action => {
+          }
+        })
+      }else{
+        var result = ipcRenderer.sendSync('login',{"accout":_this.account_value, "passwd":_this.account_password });
+        console.log("connect result:"+result)
+        var alert_str = "";
+        switch(result){
+          case -1:
+            alert_str = "m.login.accout_open_error"
+            break;
+          case -2:
+            alert_str = "m.login.accout_password_error"
+            break
+          case -3:
+            alert_str = "m.login.accout_connect_error"
+            break
+          case 0:
+        }
+        if(alert_str != ""){
+          _this.$alert(_this.$t(alert_str), _this.$t("m.alert"), {
             confirmButtonText: _this.$t("m.ok"),
             callback: action => {
             }
           })
-      }else{
-        var ddd = ipcRenderer.sendSync('login',{})
-        console.log("connect result:"+ddd)
+        }
+        
       }
 
     }

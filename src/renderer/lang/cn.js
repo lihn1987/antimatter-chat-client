@@ -24,6 +24,9 @@ export const m = {
     account_create_ok:"账户创建成功",
     account_create_faild:"账户创建失败，未知错误",
 
+    accout_open_error:"账户文件打开失败",
+    accout_password_error:"账户密码错误",
+    accout_connect_error:"账户连接失败",
     back:"返回",
   }
 }
