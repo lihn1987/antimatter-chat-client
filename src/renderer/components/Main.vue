@@ -27,6 +27,11 @@
             <el-link class="left" type="primary" @click="cur_page='create'">{{$t("m.login.new_account")}}</el-link>
             <el-link class="right" type="primary">{{$t("m.login.import_account")}}</el-link>
           </div>
+
+          <div style="margin-top:48px">
+            <div class="input_label">chat server_ip</div>
+            <el-input class="input_box" placeholder="chat server ip" v-model="chat_server_endpoint" ></el-input>
+          </div>
           
         </div>
         
@@ -72,7 +77,8 @@ export default {
       create_account_username: '',
       create_account_password: '',
       create_account_password_repeat: '',
-      account_list: []
+      account_list: [],
+      chat_server_endpoint:"192.168.31.101:9987"
       // account_list: [/* {value:'', label:''} */]
     }
   },
@@ -144,7 +150,14 @@ export default {
           }
         })
       }else{
-        var result = ipcRenderer.sendSync('login',{"accout":_this.account_value, "passwd":_this.account_password });
+        var result = ipcRenderer.sendSync('login',
+          {
+            accout:_this.account_value,
+            passwd:_this.account_password,
+            config:{
+              chat_server_ip:_this.chat_server_endpoint
+            }
+          });
         console.log("connect result:"+result)
         var alert_str = "";
         switch(result){

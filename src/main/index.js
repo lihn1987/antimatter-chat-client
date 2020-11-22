@@ -8,7 +8,7 @@ var web3 = new Web3();
 
 const buffer = require('buffer');
 import {NetClient} from "./net_client";
-var chat_client = new NetClient("192.168.31.61", 9987)
+var chat_client = null;//new NetClient("192.168.31.61", 9987)
 
 //create path
 const USER_HOME = process.env.HOME || process.env.USERPROFILE
@@ -101,8 +101,9 @@ ipcMain.on('get_account_list', (event, arg) => {
     }  
   }) 
 })
-
+//响应登录
 ipcMain.on('login', (event, arg) => {
+  console.log(arg.config.chat_server_ip)
   fs.readFile(keystore_path+arg.accout, function (err, data) {
     if (err) {
       event.returnValue = -1;
@@ -112,6 +113,10 @@ ipcMain.on('login', (event, arg) => {
       try{
         var result = web3.eth.accounts.decrypt(JSON.parse(data.toString()), arg.passwd);
         console.log(result)
+        var chat_server_split = arg.config.chat_server_ip.split(":");
+        var chat_server_ip = chat_server_split[0];
+        var chat_server_port = parseInt(chat_server_split[1]);
+        chat_client = new NetClient(chat_server_ip, chat_server_port);
         chat_client.Connect(
           function(){
             //获取公钥
