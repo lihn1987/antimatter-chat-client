@@ -16,6 +16,7 @@ class NetClient{
         })
         this.on_connect = null;
         this.on_error = null;
+        
     }
     Connect(on_connect, on_error){
         this.socket.destroy()
@@ -24,6 +25,26 @@ class NetClient{
         this.on_connect = on_connect;
         this.on_error = on_error;
     };
+    StartTimeheart(){
+        let that = this;
+        setInterval(function(){
+            let unix_time = (new Date()).valueOf();
+            let msg = MsgEncoder.net.Ping.create(
+                {
+                    version:1, 
+                    unixTime:unix_time
+                }
+            );
+            
+            let buffer_content = MsgEncoder.net.Ping.encode(msg).finish();
+            let buffer_head = new Buffer.alloc(8);
+            buffer_head.writeUIntLE(buffer_content.length+4, 0, 4)
+            buffer_head.writeUIntLE(MsgEncoder.net.PingType, 4, 4)
+            that.socket.write(Buffer.concat([buffer_head, buffer_content]));
+            console.log(Buffer.concat([buffer_head, buffer_content]));
+            console.log("write heart");
+        },1000);
+    }
     Login(){
         //var ProtoBuf = require("protobufjs");
         //console.log(MsgEncoder)
@@ -31,7 +52,7 @@ class NetClient{
     OnConnect(){
         if(this.on_connect)this.on_connect();
         console.log("connect ok!!!!!!!!!")
-        //this.Login();
+        this.StartTimeheart();
     }
     OnError(err){
         if(this.on_error)this.on_error();

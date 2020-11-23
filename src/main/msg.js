@@ -20,7 +20,9 @@ function InitEncoder(){
             }else{
                 rtn.net = Object;
                 rtn.net.Ping = root.lookup("net.Ping");
+                rtn.net.PingType = MSG_PING;
                 rtn.net.Pong = root.lookup("net.Pong");
+                rtn.net.PongType = MSG_PONG;
                 resolve(rtn);
             }
         })
