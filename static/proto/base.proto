@@ -3,9 +3,25 @@ package net;
 message Ping {
     uint32 version = 1;
     uint64 unixTime = 2;
+    uint32 index = 3;
 }
  
 message Pong {
     uint32 version = 1;
     uint64 unixTime = 2;
+    uint32 index = 3;
+}
+
+message LoginRequest {
+    uint8[65] publicKey = 1;
+    uint64 unixTime = 2;
+    uint32 index = 3;
+    uint8[64] sign = 4;
+}
+
+message LoginResponse {
+    uint8[65] publicKey = 1;
+    uint64 unixTime = 2;
+    uint32 index = 3;
+    uint8[64] sign = 4;
 }
