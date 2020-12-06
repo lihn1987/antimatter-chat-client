@@ -71,9 +71,9 @@ ipcMain.on('test', (event, arg) => {
 })
 
 ipcMain.on('create_account', (event, arg) => {
-  console.log("创建账户")
+  console.log("create_account")
   var accout_str = JSON.stringify(web3.eth.accounts.encrypt(web3.eth.accounts.create().privateKey, arg.password))
-  console.log("要创建的账户为:"+accout_str);
+  console.log("created account:"+accout_str);
   var file_path = keystore_path+arg.username;
   file_path = path.resolve(file_path)
   fs.writeFile(file_path, accout_str,  function(err) {
@@ -116,13 +116,14 @@ ipcMain.on('login', (event, arg) => {
         var chat_server_split = arg.config.chat_server_ip.split(":");
         var chat_server_ip = chat_server_split[0];
         var chat_server_port = parseInt(chat_server_split[1]);
-        chat_client = new NetClient(chat_server_ip, chat_server_port);
+        chat_client = new NetClient(chat_server_ip, chat_server_port,result.privateKey);
         chat_client.Connect(
           function(){
             //获取公钥
-            const pub_key_buf_compress = secp256k1.publicKeyCreate(Buffer.alloc(32, result.privateKey.substring(2), "hex"),true);
-            console.log(Buffer.from(pub_key_buf_compress,'hex').toString('hex'))
+            //const pub_key_buf_compress = secp256k1.publicKeyCreate(Buffer.alloc(32, result.privateKey.substring(2), "hex"),true);
+            //console.log(Buffer.from(pub_key_buf_compress,'hex').toString('hex'))
             event.returnValue = 0;
+            chat_client.Login();
           },function(){
             event.returnValue = -3; 
           })

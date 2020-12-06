@@ -28,5 +28,8 @@ export const m = {
     accout_password_error:"账户密码错误",
     accout_connect_error:"账户连接失败",
     back:"返回",
+
+    logining:"正在登陆",
+    logining_wait_server_back:"账户验证成功，正在连接服务端..."
   }
 }

@@ -58,6 +58,16 @@
         </div>
       </div>
     </div>
+    <!-- dialog for login -->
+    <el-dialog 
+      :title='$t("m.login.logining")'
+      :visible.sync="login_dlg_visible"
+      width="50%"
+      :close-on-click-modal='false'
+      :close-on-press-escape='false'
+      :show-close='false'>
+      <span>{{login_discrib}}</span>
+    </el-dialog>
   </div>
 </template>
 
@@ -78,7 +88,9 @@ export default {
       create_account_password: '',
       create_account_password_repeat: '',
       account_list: [],
-      chat_server_endpoint:"192.168.31.101:9987"
+      chat_server_endpoint:"127.0.0.1:9987",
+      login_dlg_visible:false,
+      login_discrib:this.$t("logining_wait_server_back")
       // account_list: [/* {value:'', label:''} */]
     }
   },
@@ -132,9 +144,8 @@ export default {
         }
       }
     },
+
     Login:function(){
-      /*alert(_this.account_value)
-      alert(_this.account_password)*/
       if(_this.account_value === ""){
         _this.$alert(_this.$t("m.login.account_null"), _this.$t("m.alert"), {
             confirmButtonText: _this.$t("m.ok"),
@@ -172,12 +183,15 @@ export default {
             break
           case 0:
         }
-        if(alert_str != ""){
+        if(result !== 0){
           _this.$alert(_this.$t(alert_str), _this.$t("m.alert"), {
             confirmButtonText: _this.$t("m.ok"),
             callback: action => {
             }
           })
+        }else{
+          _this.login_dlg_visible = true;
+          _this.login_discrib =_this.$t("m.login.logining_wait_server_back");
         }
         
       }
