@@ -80,16 +80,22 @@ class NetClient{
         console.log("index:",index);
         console.log("sign_buf:",sign_buf.toString("hex"));
         console.log("hash:",hash.toString("hex"));
-
-        /*let sign = 0;
+        //create login msg
+        let sign_buffer = 0;  
         let msg = MsgEncoder.net.LoginRequest.create(
             {
                 publicKey:pubkey,
                 timeStamp:unix_time,
                 index:index,
-                sign = 4;
+                sign:4
             }
-        );*/
+        );
+        let buffer_content = MsgEncoder.net.LoginRequest.encode(msg).finish();
+        let buffer_head = new Buffer.alloc(8);
+        buffer_head.writeUInt32LE(buffer_content.length+4, 0, 4)
+        buffer_head.writeUInt32LE(MsgEncoder.net.LoginRequestType, 4, 4)
+        this.socket.write(Buffer.concat([buffer_head, buffer_content]));
+
     }
     OnConnect(){
         if(this.on_connect)this.on_connect();
